@@ -1,0 +1,5 @@
+package main.pendu-webapp.WEB-INF.pendu;
+
+public class PenduServlet {
+
+}

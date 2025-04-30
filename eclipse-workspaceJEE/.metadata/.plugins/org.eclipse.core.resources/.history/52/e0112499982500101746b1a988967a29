@@ -1,0 +1,70 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="example.HangmanGame" %>
+<%
+    HangmanGame game = (HangmanGame) session.getAttribute("game");
+    boolean won = game.isGameWon();
+    session.removeAttribute("game"); // Clear the game from session
+%>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Jeu de Pendu - Résultat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+        }
+        .result {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        .word {
+            font-weight: bold;
+            color: #337ab7;
+        }
+        .play-again {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #5bc0de;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .play-again:hover {
+            background-color: #46b8da;
+        }
+        .won {
+            color: #5cb85c;
+        }
+        .lost {
+            color: #d9534f;
+        }
+    </style>
+</head>
+<body>
+    <h1>Résultat du Jeu de Pendu</h1>
+    
+    <div class="result <%= won ? 'won' : 'lost' %>">
+        <% if (won) { %>
+            Félicitations! Vous avez gagné!
+        <% } else { %>
+            Désolé, vous avez perdu.
+        <% } %>
+    </div>
+    
+    <div>
+        Le mot était: <span class="word"><%= game.getWordToGuess() %></span>
+    </div>
+    
+    <form action="HangmanServlet" method="get" style="margin-top: 30px;">
+        <input type="submit" class="play-again" value="Jouer à nouveau">
+    </form>
+</body>
+</html>
