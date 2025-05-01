@@ -1,3 +1,0 @@
-#Tomcat publish data
-#Wed Apr 30 14:48:08 CET 2025
-org.eclipse.jst.jee.server\:JeuDePendu=C\:\\Users\\Amine\\Desktop\\JEE\\setups\\apache-tomcat-9.0.98\\wtpwebapps\\JeuDePendu

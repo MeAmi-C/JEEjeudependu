@@ -1,3 +1,0 @@
-INDEX VERSION 1.134
-C:\Users\Amine\eclipse-workspaceJEE\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\809779315.index
-\JeuDePendu\src\main\java
