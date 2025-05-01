@@ -1,0 +1,384 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="example.HangmanGame" %>
+<%
+    HangmanGame game = (HangmanGame) session.getAttribute("game");
+    boolean won = game.isGameWon();
+    session.removeAttribute("game");
+    String resultClass = won ? "won" : "lost";
+%>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Game Over - Dark Comedy Hangman</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
+        
+        body {
+            font-family: 'Creepster', cursive, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url('https://assets.codepen.io/215128/crime-scene-bg-dark.jpg');
+            background-size: cover;
+        }
+        
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: rgba(34, 34, 34, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.7);
+            border: 3px solid #ff4444;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-container:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://assets.codepen.io/215128/forensic-tape.png');
+            background-size: 100% auto;
+            opacity: 0.2;
+            pointer-events: none;
+        }
+        
+        h1 {
+            color: #ff4444;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+            font-size: 3em;
+            margin-bottom: 20px;
+            letter-spacing: 3px;
+        }
+        
+        .result {
+            font-size: 28px;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .won {
+            color: #4caf50;
+            background-color: rgba(76, 175, 80, 0.1);
+            border: 2px solid #4caf50;
+        }
+        
+        .lost {
+            color: #ff4444;
+            background-color: rgba(255, 68, 68, 0.1);
+            border: 2px solid #ff4444;
+        }
+        
+        .word {
+            font-weight: bold;
+            color: #ff9800;
+            font-size: 32px;
+            letter-spacing: 5px;
+            margin: 20px 0;
+            text-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+        }
+        
+        .play-again {
+            padding: 15px 30px;
+            font-size: 20px;
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Creepster', cursive;
+            letter-spacing: 1px;
+            margin-top: 30px;
+        }
+        
+        .play-again:hover {
+            background-color: #ff0000;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+        }
+        
+        .scene {
+            margin: 30px auto;
+            position: relative;
+            height: 350px;
+            background-color: #333;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 2px solid #ff4444;
+        }
+        
+        .floor {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 20px;
+            background-color: #555;
+        }
+        
+        .character {
+            position: absolute;
+            bottom: 20px;
+            width: 150px;
+            height: 250px;
+            z-index: 2;
+        }
+        
+        .victim {
+            left: 35%;
+        }
+        
+        .executioner {
+            right: 50px;
+            width: 180px;
+            height: 300px;
+            z-index: 1;
+        }
+        
+        .character svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Confetti styles */
+        .confetti {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: #f00;
+            opacity: 0;
+        }
+        
+        /* Blood pool effect */
+        .blood-pool {
+            position: absolute;
+            bottom: 20px;
+            left: 35%;
+            width: 100px;
+            height: 20px;
+            background-color: rgba(200, 0, 0, 0.7);
+            border-radius: 50%;
+            transform: scale(0);
+            transform-origin: center bottom;
+        }
+        
+        /* Celebration styles for win */
+        .celebration {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="gold"/></svg>');
+            background-size: contain;
+            opacity: 0;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>CASE CLOSED</h1>
+        
+        <div class="scene">
+            <div class="floor"></div>
+            
+            <!-- Victim Character -->
+            <!-- Victim Character -->
+			<div class="victim character">
+			    <svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
+			        <% if (won) { %>
+			            <!-- Happy victim -->
+			            <rect x="70" y="120" width="60" height="120" fill="#5d4037" rx="5"/>
+			            <circle cx="100" cy="80" r="40" fill="#ffdbac"/>
+			            <circle cx="85" cy="70" r="5" fill="#000"/>
+			            <circle cx="115" cy="70" r="5" fill="#000"/>
+			            <path d="M85 95 Q100 110 115 95" stroke="#000" fill="none" stroke-width="2"/>
+			            <!-- Remove original arms and show celebration arms -->
+			            <rect x="30" y="80" width="15" height="60" fill="#5d4037" rx="5" transform="rotate(-30, 30, 80)"/>
+			            <rect x="155" y="80" width="15" height="60" fill="#5d4037" rx="5" transform="rotate(30, 155, 80)"/>
+			            <rect x="70" y="240" width="25" height="50" fill="#3e2723" rx="3"/>
+			            <rect x="105" y="240" width="25" height="50" fill="#3e2723" rx="3"/>
+			        <% } else { %>
+			            <!-- "Dead" victim -->
+			            <rect x="70" y="120" width="60" height="120" fill="#5d4037" rx="5" transform="rotate(20, 100, 180)"/>
+			            <circle cx="100" cy="80" r="40" fill="#ffdbac" transform="rotate(20, 100, 80)"/>
+			            <!-- X eyes -->
+			            <line x1="80" y1="65" x2="90" y2="75" stroke="#f00" stroke-width="3"/>
+			            <line x1="90" y1="65" x2="80" y2="75" stroke="#f00" stroke-width="3"/>
+			            <line x1="110" y1="65" x2="120" y2="75" stroke="#f00" stroke-width="3"/>
+			            <line x1="120" y1="65" x2="110" y2="75" stroke="#f00" stroke-width="3"/>
+			            <!-- Tongue out -->
+			            <path d="M90 100 Q100 120 110 100" stroke="#f00" fill="none" stroke-width="2"/>
+			            <rect x="30" y="120" width="40" height="15" fill="#5d4037" rx="5" transform="rotate(20, 30, 120)"/>
+			            <rect x="130" y="120" width="40" height="15" fill="#5d4037" rx="5" transform="rotate(20, 130, 120)"/>
+			            <rect x="70" y="240" width="25" height="50" fill="#3e2723" rx="3" transform="rotate(20, 70, 240)"/>
+			            <rect x="105" y="240" width="25" height="50" fill="#3e2723" rx="3" transform="rotate(20, 105, 240)"/>
+			        <% } %>
+			    </svg>
+			</div>
+            
+            <!-- Executioner Character -->
+			<div class="executioner character">
+			    <svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
+			        <!-- Body (consistent in both states) -->
+			        <rect x="70" y="100" width="60" height="150" fill="#444" rx="5"/>
+			        
+			        <!-- Head (consistent in both states) -->
+			        <circle cx="100" cy="60" r="40" fill="#444"/>
+			        <circle cx="100" cy="70" r="30" fill="#000"/>
+			        <circle cx="85" cy="60" r="8" fill="#fff"/>
+			        <circle cx="115" cy="60" r="8" fill="#fff"/>
+			        
+			        <% if (won) { %>
+			            <!-- WINNING STATE - Executioner defeated -->
+			            <!-- Arms lowered in defeat -->
+			            <rect x="30" y="150" width="40" height="15" fill="#222" rx="5" transform="rotate(-20, 30, 150)"/>
+			            <rect x="130" y="150" width="40" height="15" fill="#222" rx="5" transform="rotate(20, 130, 150)"/>
+			            
+			            <!-- Dropped pistol on the ground -->
+			            <rect x="120" y="200" width="50" height="15" fill="#333" rx="3" transform="rotate(30, 120, 200)"/>
+			            <rect x="170" y="205" width="10" height="5" fill="#333"/>
+			            
+			            <!-- Head tilted down slightly -->
+			            <animateTransform attributeName="transform" type="rotate" values="0,100,60; -5,100,60" dur="1s" fill="freeze" additive="sum"/>
+			            
+			        <% } else { %>
+			            <!-- LOSING STATE - Executioner victorious -->
+			            <!-- Arms raised in victory -->
+			            <rect x="30" y="80" width="40" height="15" fill="#222" rx="5" transform="rotate(-30, 30, 80)"/>
+			            <rect x="130" y="80" width="40" height="15" fill="#222" rx="5" transform="rotate(30, 130, 80)"/>
+			            
+			            <!-- Pistol smoking -->
+			            <rect x="165" y="130" width="50" height="15" fill="#777" rx="3" id="pistol"/>
+			            <rect x="215" y="135" width="10" height="5" fill="#555"/>
+			            
+			            <!-- Smoke animation -->
+			            <circle cx="220" cy="137" r="5" fill="#ccc" opacity="0.7">
+			                <animate attributeName="r" values="5;8;5" dur="1s" repeatCount="indefinite"/>
+			                <animate attributeName="opacity" values="0.7;0.3;0.7" dur="1s" repeatCount="indefinite"/>
+			            </circle>
+			            
+			            <!-- Head tilted back slightly -->
+			            <animateTransform attributeName="transform" type="rotate" values="0,100,60; 5,100,60" dur="1s" fill="freeze" additive="sum"/>
+			        <% } %>
+			        
+			        <!-- Legs (consistent in both states) -->
+			        <rect x="70" y="250" width="25" height="40" fill="#222" rx="3"/>
+			        <rect x="105" y="250" width="25" height="40" fill="#222" rx="3"/>
+			    </svg>
+			</div>
+            
+            <% if (!won) { %>
+                <!-- Blood pool -->
+                <div class="blood-pool" id="blood-pool"></div>
+                <div id="confetti-container"></div>
+            <% } else { %>
+                <div id="celebration-container"></div>
+            <% } %>
+        </div>
+        
+        <div class="result <%= resultClass %>">
+            <% if (won) { %>
+                CASE SOLVED! The hostage made it out alive... this time.
+            <% } else { %>
+                CASE FAILED! The executioner had his way... with a blank cartridge.
+            <% } %>
+        </div>
+        
+        <div>
+            The word was: <span class="word"><%= game.getWordToGuess() %></span>
+        </div>
+        
+        <form action="HangmanServlet" method="get">
+            <input type="submit" class="play-again" value="NEW CASE">
+        </form>
+    </div>
+    
+    <% if (!won) { %>
+    <script>
+        // Blood pool animation
+        const bloodPool = document.getElementById('blood-pool');
+        bloodPool.style.transform = 'scale(2)';
+        bloodPool.style.transition = 'transform 2s ease-out';
+        
+        // Create crime scene confetti (blood drops, shell casings, etc.)
+        const container = document.getElementById('confetti-container');
+        const colors = ['#f00', '#800', '#a00', '#c00'];
+        const types = [
+            'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><circle cx=\'50\' cy=\'50\' r=\'40\' fill=\'%23f00\'/></svg>")',
+            'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><path d=\'M30,50 Q50,30 70,50 Q60,70 50,60 Q40,70 30,50\' fill=\'%23a00\'/></svg>")',
+            'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect x=\'30\' y=\'40\' width=\'40\' height=\'20\' fill=\'%23800\'/></svg>")'
+        ];
+        
+        for (let i = 0; i < 30; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.backgroundImage = types[Math.floor(Math.random() * types.length)];
+            confetti.style.left = Math.random() * 100 + '%';
+            confetti.style.top = Math.random() * 100 + '%';
+            confetti.style.transform = 'rotate(' + Math.random() * 360 + 'deg)';
+            confetti.style.width = (Math.random() * 20 + 10) + 'px';
+            confetti.style.height = (Math.random() * 20 + 10) + 'px';
+            
+            // Animation
+            confetti.style.animation = `fall ${Math.random() * 3 + 1}s ease-in forwards`;
+            confetti.style.animationDelay = Math.random() * 0.5 + 's';
+            
+            container.appendChild(confetti);
+        }
+    </script>
+    <% } else { %>
+    <script>
+        // Create celebration effects
+        const container = document.getElementById('celebration-container');
+        
+        for (let i = 0; i < 20; i++) {
+            const star = document.createElement('div');
+            star.className = 'celebration';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.transform = 'scale(0)';
+            star.style.transformOrigin = 'center';
+            
+            // Animation
+            star.style.animation = `celebrate ${Math.random() * 2 + 1}s ease-out forwards`;
+            star.style.animationDelay = Math.random() * 1 + 's';
+            
+            container.appendChild(star);
+        }
+        
+        // Add styles for celebration
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes celebrate {
+                0% { 
+                    opacity: 0;
+                    transform: scale(0) rotate(0deg);
+                }
+                50% { 
+                    opacity: 1;
+                    transform: scale(1) rotate(180deg);
+                }
+                100% { 
+                    opacity: 0;
+                    transform: scale(0.5) rotate(360deg);
+                    top: 0%;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+    <% } %>
+</body>
+</html>
